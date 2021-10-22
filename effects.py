@@ -1,138 +1,113 @@
-import trickLED.animations
-import trickLED.animations32
-import trickLED.generators
-import trickLED.trickLED
+from trickLED import animations, animations32, generators, trickLED
 from random import randint
 from math import floor
-
-def play(animation, n_frames, **kwargs):
-    asyncio.run(animation.play(n_frames, **kwargs))
-    print("play animation")
-    
-def get_absolute(colors):
-    print("abs: ",colors['r'], colors['g'], colors['b'])
-    return (int(colors['r']), int(colors['g']), int(colors['b']))
-
-def get_dimmed(colors):
-    br = colors['br']
-    r = floor(int(colors['r'])*br//100)
-    g = floor(int(colors['g'])*br//100)
-    b = floor(int(colors['b'])*br//100)
-    print("dimmed: ", (r, g, b))
-    return (r, g, b)
+import uasyncio as asyncio
 
 # ANIMATIONS
 def solid_color(leds, colors):
-    leds.fill(get_dimmed(colors))
-    leds.write()
+    ani = animations.SolidColor(leds, colors)
+    return ani
             
-def lit_bits(leds, n_frames=200, lit_percent=50):
-    ani = animations.LitBits(leds)
+def lit_bits(leds, lit_percent=50):
+    ani = animations.LitBits(leds, lit_percent=lit_percent)
     print('LitBits settings: lit_percent={}'.format(lit_percent))
-    play(ani, n_frames, lit_percent=lit_percent)
+    return ani
     
-def next_gen(leds, n_frames=200, blanks=2, interval=150):
-    ani = animations.NextGen(leds)
+def next_gen(leds, blanks=2, interval=150):
+    ani = animations.NextGen(leds, blanks=blanks, interval=blanks)
     print('NextGen settings: blanks={}, interval={}'.format(blanks, interval))
-    play(ani, n_frames, blanks=blanks, interval=blanks)
+    return ani
     
-def jitter(leds, n_frames=200, background=0x020212, fill_mode=trickLED.FILL_MODE_SOLID):
-    ani = animations.Jitter(leds)
+def jitter(leds, background=0x020212, fill_mode=trickLED.FILL_MODE_SOLID):
+    ani = animations.Jitter(leds, background=background, fill_mode=fill_mode)
     print('Jitter settings: default')
-    play(ani, n_frames, background=background, fill_mode=fill_mode)
-#     print('Jitter settings: background=0x020212, fill_mode=FILL_MODE_SOLID')
-#     ani.generator = generators.random_vivid()
-#     play(ani, n_frames, background=0x020212, fill_mode=trickLED.FILL_MODE_SOLID)
+    return ani
     
-def side_swipe(leds, n_frames=200):
+def side_swipe(leds, **kwargs):
     ani = animations.SideSwipe(leds)
     print('SideSwipe settings: default')
-    play(ani, n_frames)
+    return ani
 
-def divergent(leds, n_frames=200, fill_mode=trickLED.FILL_MODE_MULTI):
-    ani = animations.Divergent(leds)
+def divergent(leds, fill_mode=trickLED.FILL_MODE_MULTI):
+    ani = animations.Divergent(leds, fill_mode=fill_mode)
     print('Divergent settings: default')
-    play(ani, n_frames, fill_mode=fill_mode)
-#     print('Divergent settings: fill_mode=FILL_MODE_MULTI')
-#     play(ani, n_frames, fill_mode=trickLED.FILL_MODE_MULTI)
+    return ani
 
-def convergent(leds, n_frames=200, fill_mode=trickLED.FILL_MODE_MULTI):
-    ani = animations.Convergent(leds)
+def convergent(leds, fill_mode=trickLED.FILL_MODE_MULTI):
+    ani = animations.Convergent(leds, fill_mode=fill_mode)
     print('Convergent settings: default')
-    play(ani, n_frames, fill_mode=fill_mode)
-#     print('Convergent settings: fill_mode=FILL_MODE_MULTI')
-#     play(ani, n_frames, fill_mode=trickLED.FILL_MODE_MULTI)
+    return ani
 
-def fire(leds, n_frames=200):
+def fire(leds):
     ani = animations32.Fire(leds)
     print('Fire settings: default')
-    play(ani, n_frames)
+    return ani
 
-def conjuction(leds, n_frames=200):
+def conjuction(leds):
     ani = animations32.Conjunction(leds)
     print('Conjuction settings: default')
-    play(ani, n_frames)
+    return ani
 
 # GENERATORS
-def stepped_color_wheel(leds, n_frames=200):  
+def stepped_color_wheel(leds):  
     print('stepped_color_wheel')
     ani = animations.NextGen(leds, generator = generators.stepped_color_wheel())
-    play(ani, n_frames)
+    return ani
     
-def striped_color_wheel(leds, n_frames=200, stripe_size=1):
-    print('stepped_color_wheel(stripe_size={})'.format(strip_size))
-    ani.generator = generators.striped_color_wheel(stripe_size=strip_size)
-    play(ani, n_frames)
+def striped_color_wheel(leds, stripe_size=1):
+    print('stepped_color_wheel(stripe_size={})'.format(stripe_size))
+    ani = animations.NextGen(leds, generator = generators.striped_color_wheel(stripe_size=stripe_size))
+    return ani
     
-def fading_color_wheel(leds, n_frames=200, mode=trickLED.FADE_OUT):
+def fading_color_wheel(leds, mode=trickLED.FADE_OUT):
     print('fading_color_wheel(mode={})'.format(mode))
-    ani.generator = generators.fading_color_wheel(mode=mode)
-    play(ani, n_frames)
+    ani = animations.NextGen(leds, generator = generators.fading_color_wheel(mode=mode))
+    return ani
     
-def color_compliment(leds, n_frames=200):
+def color_compliment(leds):
     print('color_compliment()')
-    ani = animations.NextGen(generator = generators.color_compliment(stripe_size=10))
-    play(ani, n_frames)
+    ani = animations.NextGen(leds, generator = generators.color_compliment(stripe_size=10))
+    return ani
     
-def random_vivid(leds, n_frames=200):
+def random_vivid(leds):
     print('random_vivid()')
-    ani = animations.NextGen(generator = generators.random_vivid())
-    play(ani, n_frames)
+    ani = animations.NextGen(leds, generator = generators.random_vivid())
+    return ani
     
-def random_pastel(leds, n_frames=200, mask=(randint(0,254),randint(0,254),randint(0,254))):
+def random_pastel(leds, mask=(randint(0,254),randint(0,254),randint(0,254))):
     print('random_pastel(mask={})'.format(mask))
-    ani.generator = generators.random_pastel(mask=mask)
-    play(ani, n_frames)
+    ani = animations.NextGen(leds, generator = generators.random_pastel(mask=mask))
+    return ani
 
-def run(leds, colors, **kwargs):
+def get_animation(leds, colors,  **kwargs):
     animation = colors['effect']
     if animation == "solid_color":
-        solid_color(leds, colors)
+        return solid_color(leds, colors)
     elif animation == "lit_bits":
-        lit_bits(leds, n_frames=200, lit_percent=50)
+        return lit_bits(leds, lit_percent=50)
     elif animation == "next_gen":
-        next_gen(leds, n_frames=200, blanks=2, interval=150)
+        return next_gen(leds,  blanks=2, interval=150)
     elif animation == "jitter":
-        jitter(leds, n_frames=200, background=0x020212, fill_mode=trickLED.FILL_MODE_SOLID)
+        return jitter(leds, background=0x020212, fill_mode=trickLED.FILL_MODE_SOLID)
     elif animation == "side_swipe":
-        side_swipe(leds, n_frames=200)
+        return side_swipe(leds)
     elif animation == "divergent":
-        divergent(leds, n_frames=200)
+        return divergent(leds)
     elif animation == "convergent":
-        convergent(leds, n_frames=200)
+        return convergent(leds)
     elif animation == "fire":
-        fire(leds, n_frames=200)
+        return fire(leds)
     elif animation == "conjunction":
-        conjuction(leds, n_frames=200)
+        return conjuction(leds)
     elif animation == "stepped_color_wheel":
-        stepped_color_wheel(leds, n_frames=200)
+        return stepped_color_wheel(leds)
     elif animation == "striped_color_wheel":
-        striped_color_wheel(leds, n_frames=200)
+        return striped_color_wheel(leds)
     elif animation == "fading_color_wheel":
-        fading_color_wheel(leds, n_frames=200)
+        return fading_color_wheel(leds)
     elif animation == "color_compliment":
-        color_compliment(leds, n_frames=200)
+        return color_compliment(leds)
     elif animation == "random_vivid":
-        random_vivid(leds, n_frames=200)
+        return random_vivid(leds)
     elif animation == "random_pastel":
-        random_pastel(leds, n_frames=200)
+        return random_pastel(leds)

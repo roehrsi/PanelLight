@@ -1,104 +1,82 @@
+import machine, sys, time, wifimgr, ujson, trickLED, picoweb, effects, gc
+
 import uasyncio as asyncio
-import machine, sys, wifimgr, time, ujson, trickLED, effects
-from trickLED import animations, generators, animations32
 from web_page import web_page
 
+gc.enable()
+
+req = bytearray(4096)
 COLOR_PROFILE = "colors.json"
 
 def read_color_profiles():
     with open(COLOR_PROFILE) as f:
-        return ujson.load(f)  
+        return ujson.load(f)
 
 def write_color_profiles(colors):
     with open(COLOR_PROFILE, "w") as f:
         f.write(ujson.dumps(colors))
+        print("Profile updated to ", colors)
 
-def qs_parse(qs):
-    """return parameters parsed from URL snippet as dict"""
-    parameters = {}
-    ampersandSplit = qs.split("&")
-    for element in ampersandSplit:
-        equalSplit = element.split("=")
-        print(equalSplit)
-        parameters[equalSplit[0]] = equalSplit[1]
-    return parameters
-
-def parse_get(request):
-    """Parse GET URL for config data"""
-    data = request.split(" ")
-    for d in data:
-        if d.startswith("/colors?"):
-            parsed = qs_parse(d[8:])
-            print("Updated color profile to ", colors)
-            return parsed
-        if d.startswith("/effects?"):
-            parsed = qs_parse(d[9:])
-            print("Updated effect to ", parsed)
-            return parsed
-
-def main():
-    # pixel setup
-    p = 12
-    n = 58
-    pin = machine.Pin(12, machine.Pin.OUT)
-    leds = trickLED.TrickLED(pin, n, timing=1)
-    leds.repeat_n = 29
-    leds.repeat_mode = leds.REPEAT_MODE_MIRROR
-    
-    # set the default color profile
-    try:
-        colors = read_color_profiles()
-    except:
-        print(f"Could not load {COLOR_PROFILE}. Continue with default settings.")
-        colors = {"r":1,"g":1,"b":1, "br":10, "effect":"solid_color"}
-    print(colors)
-    
-    # the wifi setup
-    # connect to known wifi (wifi.dat) or connect to new wifi via web interface
-    try:
-        import usocket as socket
-    except:
-        import socket
-
-    wlan = wifimgr.get_connection()
-    if wlan is None:
-        print("Could not initialize the network connection.")
-        while True:
-            pass  # you shall not pass :D
-    print("ESP OK")
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind(('', 80))
-        s.listen(5)
-    except OSError as e:
-        machine.reset()
-    
-    # the main loop
-    # wait for request from a client and parse forms to update LED settings. respond with updated html
+# MAIN SCRIPT
+wlan = wifimgr.get_connection()
+if wlan is None:
     while True:
-        try:
-            if gc.mem_free() < 102000:
-                  gc.collect()
-            conn, addr = s.accept()
-            conn.settimeout(3.0)
-            print(f'Got a connection from {addr}')
-            request = conn.recv(1024)
-            conn.settimeout(None)
-            request = str(request)
-            
-            colors.update(parse_get(request))
-            effects.run(leds, colors)
-            
-            response = web_page(colors)
-            conn.send('HTTP/1.1 200 OK\n')
-            conn.send('Content-Type: text/html\n')
-            conn.send('Connection: close\n\n')
-            conn.sendall(response)
-            conn.close()
-        except OSError as e:
-            conn.close()
-            print('Connection closed')
-        
-if __name__ == '__main__':
-    main()    
+        pass
+app_host = wlan.ifconfig()[0]
+app_port=const(80)
+
+# pixel setup
+p = const(12)
+n = const(58)
+leds = trickLED.TrickLED(machine.Pin(p, machine.Pin.OUT), n, timing=1)
+leds.repeat_n = n//2
+leds.repeat_mode = leds.REPEAT_MODE_MIRROR
+
+try:
+    colors = read_color_profiles()
+    print(f"Colors loaded successfully: {colors}")
+except:
+    print(f"Could not load {COLOR_PROFILE}. Continue with default settings.")
+    colors = {"r":100,"g":100,"b":100, "br":20, "effect":"solid_color"}
+
+task = asyncio.create_task(effects.get_animation(leds, colors).play())
+
+def get_task():
+    return task
+
+def set_task(t):
+    global task
+    task = t
+
+def index(req, resp):
+    yield from picoweb.start_response(resp, content_type = "text/html")
+    gc.collect()
+    yield from resp.awrite(web_page(colors, 0))
+    yield from resp.awrite(web_page(colors, 1))
+    yield from resp.awrite(web_page(colors, 2))
+
+def request(req, resp):
+    req.parse_qs()
+    yield from picoweb.start_response(resp, content_type = "text/html")
+    gc.collect()
+    colors.update(req.form)
+    write_color_profiles(colors)
+    get_task().cancel()
+    set_task(asyncio.create_task(effects.get_animation(leds, colors).play()))
+    yield from resp.awrite(web_page(colors, 0))
+    yield from resp.awrite(web_page(colors, 1))
+    yield from resp.awrite(web_page(colors, 2))
+
+ROUTES = [
+    ("/", index),
+    ("/colors", request)
+]
+
+# lastly, run the web server
+app = picoweb.WebApp(__name__, ROUTES)
+try:
+    app.run(debug=1, host=app_host, port=app_port)
+finally:
+    asyncio.new_event_loop()
+    print("Closing event loop")
+    
