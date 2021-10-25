@@ -1,9 +1,12 @@
+from effects import get_effect_names
+
 def web_page(colors, index):
     r=str(colors['r'])
     g=str(colors['g'])
     b=str(colors['b'])
     br=str(colors['br'])
     effect=str(colors['effect'])
+    effects_list = get_effect_names()
 
     if index == 0:
         return b'''<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>
@@ -22,25 +25,14 @@ def web_page(colors, index):
                 <output class="brOutput" for="brSlider" id="brOutput"></output>
             </div>'''.format(r,g,b,br)
     if index == 1:
-        return b'''<div><label for="effect">Select an effect</label><select id="effect" name="effect">
-            <option value="solid_color">Solid Color</option>
-            <option value="stepped_color_wheel">stepped_color_wheel</option>
-            <option value="striped_color_wheel">striped_color_wheel</option>
-            <option value="fading_color_wheel">fading_color_wheel</option>
-            <option value="color_compliment">color_compliment</option>
-            <option value="random_vivid">random_vivid</option>
-            <option value="random_pastel">random_pastel</option>
-            <option value="lit_bits">LitBits</option>
-            <option value="next_gen">NextGen</option>
-            <option value="jitter">Jitter</option>
-            <option value="side_swipe">SideSwipe</option>
-            <option value="divergent">Divergent</option>
-            <option value="onvergent">Convergent</option>
-            <option value="fire">Fire</option>
-            <option value="conjuction">Conjuction</option>
-            </select><button type="submit">POST</button></form>'''
+        return b'''<div><label for="effect">Select an effect</label><select id="effect" name="effect">'''
+    
     if index == 2:
-        return b'''<script>
+        template = '<option value="{effect}">{effect}</option>'
+            return "".join([template.format(effect) for effect in effects_list])    
+
+    if index == 3:
+        return b'''</select><button type="submit">POST</button></form><script>
             const rSlider = document.querySelector('#rSlider');
             const rOutput = document.querySelector('.rOutput');
             const gSlider = document.querySelector('#gSlider');

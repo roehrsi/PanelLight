@@ -54,6 +54,7 @@ def index(req, resp):
     yield from resp.awrite(web_page(colors, 0))
     yield from resp.awrite(web_page(colors, 1))
     yield from resp.awrite(web_page(colors, 2))
+    yield from resp.awrite(web_page(colors, 3))
 
 def request(req, resp):
     req.parse_qs()
@@ -66,6 +67,7 @@ def request(req, resp):
     yield from resp.awrite(web_page(colors, 0))
     yield from resp.awrite(web_page(colors, 1))
     yield from resp.awrite(web_page(colors, 2))
+    yield from resp.awrite(web_page(colors, 3))
 
 ROUTES = [
     ("/", index),
