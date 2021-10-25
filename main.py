@@ -81,4 +81,3 @@ try:
 finally:
     asyncio.new_event_loop()
     print("Closing event loop")
-    
