@@ -28,8 +28,8 @@ def web_page(colors, index):
         return b'''<div><label for="effect">Select an effect</label><select id="effect" name="effect">'''
     
     if index == 2:
-        template = '<option value="{effect}">{effect}</option>'
-        return "".join([template.format(effect) for effect in effects_list])    
+        template = '<option value="{}">{}</option>'
+        return "".join([template.format(effect, effect) for effect in effects_list])    
 
     if index == 3:
         return b'''</select><button type="submit">POST</button></form><script>
