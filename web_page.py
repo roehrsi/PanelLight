@@ -1,16 +1,19 @@
-from effects import get_effect_names
+from effects import get_effect_names, get_generator_names
 
 def web_page(colors, index):
     r=str(colors['r'])
     g=str(colors['g'])
     b=str(colors['b'])
     br=str(colors['br'])
-    effect=str(colors['effect'])
+    effect=colors['effect']
+    generator=colors
     effects_list = get_effect_names()
+    generators_list = get_generator_names()
 
+    # COLOR SLIDERS
     if index == 0:
         return b'''<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>
-            <h1>Light Panel Control</h1><h2>Solid Color</h2><form action="/colors" method="GET"><h3>Hue:</h3>
+            <h1>Light Panel Control</h1><h2>Solid Color</h2><form action="/colors" method="POST"><h3>Hue:</h3>
             <div class="slidecontainer"><label for="rSlider">R:</label>
                 <input type="range" id="rSlider" name="r" min="0" max="255" value="{}">
                 <output class="rOutput" for="rSlider" id="rOutput"></output>
@@ -24,15 +27,30 @@ def web_page(colors, index):
                 <input type="range" id="brSlider" name="br" min="0" max="100" value="{}">
                 <output class="brOutput" for="brSlider" id="brOutput"></output>
             </div>'''.format(r,g,b,br)
+    
+    # EFFECT SELECTOR
     if index == 1:
         return b'''<div><label for="effect">Select an effect</label><select id="effect" name="effect">'''
     
     if index == 2:
-        template = '<option value="{}">{}</option>'
-        return "".join([template.format(effect, effect) for effect in effects_list])    
-
+        return "".join(['<option value="{}">{}</option>'.format(effect, effect) for effect in effects_list])
+    
     if index == 3:
-        return b'''</select><button type="submit">POST</button></form><script>
+        return b'''</select>'''
+    
+    # GENERATOR SELECTOR
+    if index == 4:
+        return b'''<div><label for="generator">Select a generator</label><select id="generator" name="generator">'''
+
+    if index == 5:
+        return "".join(['<option value="{}">{}</option>'.format(generator, generator) for generator in get_effect_names()])
+
+    if index == 6:
+        return b'''</select><button type="submit">POST</button></form>'''
+
+    # JAVA SCRIPT
+    if index == 7:
+        return b'''<script>
             const rSlider = document.querySelector('#rSlider');
             const rOutput = document.querySelector('.rOutput');
             const gSlider = document.querySelector('#gSlider');
@@ -58,4 +76,4 @@ def web_page(colors, index):
               brOutput.textContent = this.value;
             }});
             document.querySelector('#effect').value="{}"
-            </script></body></html>'''.format(effect)
+            </script></body></html>'''.format(effect, generator)

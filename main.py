@@ -37,7 +37,7 @@ try:
     print(f"Colors loaded successfully: {colors}")
 except:
     print(f"Could not load {COLOR_PROFILE}. Continue with default settings.")
-    colors = {"r":100,"g":100,"b":100, "br":20, "effect":"solid_color"}
+    colors = {"r":100,"g":100,"b":100, "br":20, "effect":"solid_color", "generator":None}
 
 task = asyncio.create_task(effects.get_animation(leds, colors).play())
 
@@ -51,10 +51,8 @@ def set_task(t):
 def index(req, resp):
     yield from picoweb.start_response(resp, content_type = "text/html")
     gc.collect()
-    yield from resp.awrite(web_page(colors, 0))
-    yield from resp.awrite(web_page(colors, 1))
-    yield from resp.awrite(web_page(colors, 2))
-    yield from resp.awrite(web_page(colors, 3))
+    for i in range(0, 8):
+        yield from resp.awrite(web_page(colors, i))
 
 def request(req, resp):
     req.parse_qs()
@@ -64,10 +62,8 @@ def request(req, resp):
     write_color_profiles(colors)
     get_task().cancel()
     set_task(asyncio.create_task(effects.get_animation(leds, colors).play()))
-    yield from resp.awrite(web_page(colors, 0))
-    yield from resp.awrite(web_page(colors, 1))
-    yield from resp.awrite(web_page(colors, 2))
-    yield from resp.awrite(web_page(colors, 3))
+    for i in range(0, 8):
+        yield from resp.awrite(web_page(colors, i))
 
 ROUTES = [
     ("/", index),
