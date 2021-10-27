@@ -75,5 +75,6 @@ def web_page(colors, index):
             brSlider.addEventListener('input', function() {{
               brOutput.textContent = this.value;
             }});
-            document.querySelector('#effect').value="{}"
+            document.querySelector('#effect').value="{}";
+            document.querySelector('#generator').value="{}";
             </script></body></html>'''.format(effect, generator)
