@@ -65,7 +65,7 @@ class Effects():
         ani.settings['brightness'] = int(colors['br']) # Brightness
         # anim specific settings
         ani.settings['blanks'] = 0
-        ani.settings['sroll_speed'] = 1 # (-1,1) for forwards/backwards
+        ani.settings['scroll_speed'] = 1 # (-1,1) for forwards/backwards
         print(f'NextGen settings: {ani.settings}')
         return ani
     

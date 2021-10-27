@@ -13,7 +13,7 @@ def web_page(colors, index):
     # COLOR SLIDERS
     if index == 0:
         return b'''<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body>
-            <h1>Light Panel Control</h1><h2>Solid Color</h2><form action="/colors" method="POST"><h3>Hue:</h3>
+            <h1>Light Panel Control</h1><h2>Solid Color</h2><form method="POST"><h3>Hue:</h3>
             <div class="slidecontainer"><label for="rSlider">R:</label>
                 <input type="range" id="rSlider" name="r" min="0" max="255" value="{}">
                 <output class="rOutput" for="rSlider" id="rOutput"></output>
@@ -43,7 +43,7 @@ def web_page(colors, index):
         return b'''<div><label for="generator">Select a generator</label><select id="generator" name="generator">'''
 
     if index == 5:
-        return "".join(['<option value="{}">{}</option>'.format(generator, generator) for generator in get_effect_names()])
+        return "".join(['<option value="{}">{}</option>'.format(generator, generator) for generator in get_generator_names()])
 
     if index == 6:
         return b'''</select><button type="submit">POST</button></form>'''

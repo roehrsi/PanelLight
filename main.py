@@ -49,13 +49,10 @@ def set_task(t):
     task = t
 
 def index(req, resp):
-    yield from picoweb.start_response(resp, content_type = "text/html")
-    gc.collect()
-    for i in range(0, 8):
-        yield from resp.awrite(web_page(colors, i))
-
-def request(req, resp):
-    req.parse_qs()
+    if req.method == "POST":
+        yield from req.read_form_data()
+    else:  # GET, apparently
+        req.parse_qs()
     yield from picoweb.start_response(resp, content_type = "text/html")
     gc.collect()
     colors.update(req.form)
@@ -67,7 +64,6 @@ def request(req, resp):
 
 ROUTES = [
     ("/", index),
-    ("/colors", request)
 ]
 
 # lastly, run the web server
