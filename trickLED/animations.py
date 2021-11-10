@@ -128,11 +128,8 @@ class AnimationBase:
         print('Actual fps: {:0.02f} - interval fps: {:0.02f}\n'.format(fps, ifps))
 
 class SolidColor(AnimationBase):
-    """
-    Just a stub animation to set leds to a solid color
-    Use generator = None for solid, or pass a generator
-    """
-    def __init__(self, leds, colors, generator=None):
+    """ Just a stub animation to set leds to a solid color"""
+    def __init__(self, leds, colors):
         """
         :param leds: TrickLED object
         :param interval: millisecond pause between each frame
@@ -140,7 +137,7 @@ class SolidColor(AnimationBase):
         :param generator: color generator
         :param brightness: set brightness 0-100
         """
-        super().__init__(leds, generator=generator)
+        super().__init__(leds)
         self.brightness = int(colors["br"])
         self.red = int(colors["r"])*self.brightness//100
         self.green = int(colors["g"])*self.brightness//100
@@ -148,11 +145,10 @@ class SolidColor(AnimationBase):
         self.settings['interval'] = 5000
         
     def setup(self):
-        if self.generator:
-            self.leds.fill_gen(self.generator)
-            self.leds.write()
-        else:
-            self.leds.fill_solid((self.red, self.green, self.blue))
+        self.leds.fill_solid((self.red, self.green, self.blue))
+        
+    def calc_frame(self):
+        self.leds.fill_solid((self.red, self.green, self.blue))
 
 class NextGen(AnimationBase):
     """ Simple animation that animates a color generator by scrolling and
@@ -340,7 +336,7 @@ class Convergent(AnimationBase):
     def __init__(self, leds, fill_mode=None, **kwargs):
         super().__init__(leds, **kwargs)
         if self.palette is None:
-            self.palette = default_palette(20, self.settings['brightness'])
+            self.palette = default_palette(20)
         self.settings['fill_mode'] = fill_mode or trickLED.FILL_MODE_SOLID
 
     def setup(self):
@@ -395,7 +391,7 @@ class Divergent(AnimationBase):
     def __init__(self, leds, fill_mode=None, **kwargs):
         super().__init__(leds, **kwargs)
         if self.palette is None:
-            self.palette = default_palette(20, self.settings['brightness'])
+            self.palette = default_palette(20)
         self.settings['fill_mode'] = fill_mode or trickLED.FILL_MODE_SOLID
 
     def setup(self):

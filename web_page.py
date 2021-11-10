@@ -6,7 +6,7 @@ def web_page(colors, index):
     b=str(colors['b'])
     br=str(colors['br'])
     effect=colors['effect']
-    generator=colors
+    generator=colors['generator']
     effects_list = get_effect_names()
     generators_list = get_generator_names()
 

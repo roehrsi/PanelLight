@@ -12,99 +12,106 @@ class Effects():
     """   
     
     # GENERATORS
-    def gen_none():
+    def gen_none(colors, hue_stride=10, stripe_size=20, start_hue=0):
         return None
     
-    def gen_stepped_color_wheel(colors):  
-        return generators.stepped_color_wheel(hue_stride=10, stripe_size=20, start_hue=0)
+    def gen_stepped_color_wheel(colors, hue_stride=10, stripe_size=7, start_hue=0):  
+        return generators.stepped_color_wheel(hue_stride, stripe_size, start_hue)
         
-    def gen_striped_color_wheel(colors):
-        return generators.striped_color_wheel(hue_stride=10, stripe_size=10, start_hue=0)
+    def gen_striped_color_wheel(colors, hue_stride=10, stripe_size=10, start_hue=0):
+        return generators.striped_color_wheel(hue_stride, stripe_size, start_hue)
     
-    def gen_fading_color_wheel(colors):
-        return generators.fading_color_wheel(hue_stride=10, stripe_size=20, start_hue=0, mode=trickLED.FADE_OUT)
+    def gen_fading_color_wheel(colors, hue_stride=10, stripe_size=28, start_hue=0):
+        return generators.fading_color_wheel(hue_stride, stripe_size, start_hue, mode=trickLED.FADE_OUT)
             
-    def gen_color_compliment(colors):
-        return generators.color_compliment(hue_stride=10, stripe_size=5, start_hue=0)
+    def gen_color_compliment(colors, hue_stride=10, stripe_size=7, start_hue=0):
+        return generators.color_compliment(hue_stride, stripe_size, start_hue)
            
-    def gen_random_vivid(colors):
+    def gen_random_vivid(colors, hue_stride=10, stripe_size=20, start_hue=0):
         return generators.random_vivid()
            
-    def gen_random_pastel(colors):
+    def gen_random_pastel(colors, hue_stride=10, stripe_size=20, start_hue=0):
         return generators.random_pastel(mask=(int(colors['r']),int(colors['g']),int(colors['b'])))
     
     # ANIMATIONS   
     # no animation, only color
     def ani_solid_color(leds, colors):
-        ani = animations.SolidColor(leds, colors)
+        genfunc = getattr(Effects, colors['generator'])
+        ani = animations.SolidColor(leds, colors, generator = getattr(Effects, colors['generator'])(colors, 10, 3, 0))
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
+        ani.leds.repeat_n = leds.n//2
         return ani
 
     # Base options: leds, interval=50, palette=None, generator=None, brightness=200
     def ani_lit_bits(leds, colors):
-        ani = animations.LitBits(leds, interval=50, palette=None, generator=None, brightness=200, lit_percent=50)
+        ani = animations.LitBits(leds, palette = None)
         # base settings
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
+        ani.leds.repeat_n = leds.n//2
+#         ani.palette = None # color palette
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
-        ani.settings['palette'] = None # color palette
-        ani.settings['generator'] = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['brightness'] = int(colors['br']) # Brightness
         # anim specific settings
-        ani.settings['lit_percent'] = 40
+        ani.settings['lit_percent'] = None
         print(f'LitBits settings: {ani.settings}')
         return ani
     
     # Options: blanks=0, scroll_speed=1
     def ani_next_gen(leds, colors):
-        ani = animations.NextGen(leds)
+        ani = animations.NextGen(leds, palette = None)
         # base settings
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
+        ani.leds.repeat_n = leds.n//2
+#         ani.palette = None # color palette
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
-        ani.settings['palette'] = None # color palette
-        ani.settings['generator'] = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['brightness'] = int(colors['br']) # Brightness
         # anim specific settings
-        ani.settings['blanks'] = 0
+        ani.settings['blanks'] = 0 
         ani.settings['scroll_speed'] = 1 # (-1,1) for forwards/backwards
         print(f'NextGen settings: {ani.settings}')
         return ani
     
     
     def ani_jitter(leds, colors):
-        ani = animations.Jitter(leds)
+        ani = animations.Jitter(leds, palette = None)
         # base settings
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
-        ani.settings['interval'] = 100 # millisecond pause between each frame
-        ani.settings['palette'] = None # color palette
-        ani.settings['generator'] = getattr(Effects, colors['generator'])(colors) # color generator
+        ani.leds.repeat_n = leds.n
+#         ani.palette = None # color palette
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
+        ani.settings['interval'] = 10 # millisecond pause between each frame
         ani.settings['brightness'] = int(colors['br']) # Brightness
         # anim specific settings
-        ani.settings['background'] = rgb_to_hex(colors) # Background color of unsparked pixels
-        ani.settings['fade_percent'] = 40 # Percent to fade colors each cycle
-        ani.settings['sparking'] = 25 # Odds / 255 of sparking more pixels
-        ani.settings['lit_percent'] = 15 # Approximate percent of pixels to be lit when sparking
-        ani.settings['fill_mode'] = trickLED.FILL_MODE_SOLID #fill sparked with either same color (solid) or generate new color for each (multi).
+        ani.settings['background'] = 0x000000 # rgb_to_hex(colors) # Background color of unsparked pixels
+        ani.settings['fade_percent'] = 60 # Percent to fade colors each cycle
+        ani.settings['sparking'] = 50 # Odds / 255 of sparking more pixels
+        ani.settings['lit_percent'] = 30 # Approximate percent of pixels to be lit when sparking
+        ani.settings['fill_mode'] = trickLED.FILL_MODE_MULTI if ani.generator else trickLED.FILL_MODE_SOLID #fill sparked with either same color (solid) or generate new color for each (multi).
         print(f'Jitter settings: {ani.settings}')
         return ani
 
     def ani_side_swipe(leds, colors):
-        ani = animations.SideSwipe(leds)
+        ani = animations.SideSwipe(leds, palette = None)
         # base settings
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
+        ani.leds.repeat_n = leds.n//2
+#         ani.palette = None # color palette
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
-        ani.settings['palette'] = None # color palette
-        ani.settings['generator'] = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['brightness'] = int(colors['br']) # Brightness
         print(f'SideSwipe settings: {ani.settings}')
         return ani
     
     def ani_divergent(leds, colors):
-        ani = animations.Divergent(leds, fill_mode=fill_mode)
+        ani = animations.Divergent(leds, palette = None)
         # base settings
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
+        ani.leds.repeat_n = leds.n//2
+#         ani.palette = None # color palette
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
-        ani.settings['palette'] = None # color palette
-        ani.settings['generator'] = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['brightness'] = int(colors['br']) # Brightness
         # anim specific settings
         ani.settings['fill_mode'] = trickLED.FILL_MODE_MULTI
@@ -112,12 +119,13 @@ class Effects():
         return ani
     
     def ani_convergent(leds, colors):
-        ani = animations.Convergent(leds)
+        ani = animations.Convergent(leds, palette = None)
         # base settings
+        ani.leds.repeat_n = n//2
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
+#         ani.palette = None # color palette
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
-        ani.settings['palette'] = None # color palette
-        ani.settings['generator'] = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['brightness'] = int(colors['br']) # Brightness
         # anim specific settings
         ani.settings['fill_mode'] = trickLED.FILL_MODE_MULTI
@@ -125,28 +133,30 @@ class Effects():
         return ani
     
     def ani_fire(leds, colors):
-        ani = animations32.Fire(leds)
+        ani = animations32.Fire(leds, palette = None)
         # base settings
-        ani.leds.repeat_mode = leds.REPEAT_MODE_STRIPE
+        ani.leds.repeat_mode = None
+        ani.leds.repeat_n = None
+#         ani.palette = None # color palette
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
-        ani.settings['palette'] = None # color palette
-        ani.settings['generator'] = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['brightness'] = int(colors['br']) # Brightness
         # anim specific settings
         ani.settings['sparking'] = 32
         ani.settings['cooling'] = 15
         ani.settings['scroll_speed'] = 1
-        ani.settings['hotspots'] = 1
+        ani.settings['hotspots'] = 4
         print(f'Fire settings: {ani.settings}')
         return ani
     
     def ani_conjuction(leds, colors):
-        ani = animations32.Conjunction(leds)
+        ani = animations32.Conjunction(leds, palette = None)
         # base settings
-        ani.leds.repeat_mode = leds.REPEAT_MODE_STRIPE
+        ani.leds.repeat_n = None
+        ani.leds.repeat_mode = None
+#         ani.palette = None # color palette
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
-        ani.settings['palette'] = None # color palette
-        ani.settings['generator'] = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['brightness'] = int(colors['br']) # Brightness
         print(f'Conjuction settings: {ani.settings}')
         return ani
@@ -159,19 +169,25 @@ def rgb_to_hex(colors):
 
 def get_effect_names():
     """
-    @return str the registered effects from Effects class as names
+    @return str the registered animation from Effects class as names
     """
     return [name for name in dir(Effects) if name.startswith('ani_')]
 
 def get_generator_names():
     """
-    @return str the registered effects from Effects class as names
+    @return str the registered generator from Effects class as names
     """
     return [name for name in dir(Effects) if name.startswith('gen_')]
 
+def get_palette():
+    """
+    @return palette get a color palette for animations
+    """
+    pass
+
 def get_animation(leds, colors):
     """
-    @return the animation registered to the given effect name
+    @return func the animation registered to the given effect name
     """
     effect = colors['effect']
     try:

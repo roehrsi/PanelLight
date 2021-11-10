@@ -29,15 +29,16 @@ app_port=const(80)
 p = const(12)
 n = const(58)
 leds = trickLED.TrickLED(machine.Pin(p, machine.Pin.OUT), n, timing=1)
-leds.repeat_n = n//2
-leds.repeat_mode = leds.REPEAT_MODE_MIRROR
+
+def get_default_colors():
+    return {"r":100,"g":100,"b":100, "br":20, "effect":"solid_color", "generator":None}
 
 try:
     colors = read_color_profiles()
     print(f"Colors loaded successfully: {colors}")
 except:
     print(f"Could not load {COLOR_PROFILE}. Continue with default settings.")
-    colors = {"r":100,"g":100,"b":100, "br":20, "effect":"solid_color", "generator":None}
+    colors = get_default_colors()
 
 task = asyncio.create_task(effects.get_animation(leds, colors).play())
 
