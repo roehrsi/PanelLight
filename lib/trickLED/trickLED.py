@@ -439,6 +439,7 @@ class TrickLED(NeoPixel):
         :param start_pos: Start position, defaults to beginning of strip
         :param end_pos: End position, defaults to end of strip
         """
+        color = colval(color, self.bpp)
         if end_pos is None or end_pos >= self.n:
             end_pos = (self.repeat_n or self.n) - 1
         for i in range(start_pos, end_pos + 1):

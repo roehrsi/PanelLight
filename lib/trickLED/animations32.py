@@ -48,10 +48,11 @@ class MappedAnimationBase(AnimationBase):
                 buf += pal.buf[i:i+bpi]
             else:
                 buf += zero
-        if len(self.leds.buf) == len(buf):   
-            self.leds.buf = buf
-        else:
-            raise Exception('buffer length changed')
+        self.leds.buf = buf
+#         if len(self.leds.buf) == len(buf):   
+#             self.leds.buf = buf
+#         else:
+#             raise Exception('buffer length changed')
 
 
 class Fire(MappedAnimationBase):
@@ -77,7 +78,7 @@ class Fire(MappedAnimationBase):
         # we map 256 heat levels to a palette of 64, 128 or 256, calculated in setup()
         self.settings['palette_shift'] = 0
         self._flash_points = None
-        if 'palette' in kwargs:
+        if 'palette' in kwargs and kwargs['palette']:
             if len(kwargs['palette']) >= 64:
                 self.palette = kwargs['palette']
             else:

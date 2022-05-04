@@ -27,7 +27,7 @@ def default_palette(n, brightness=200):
 class AnimationBase:
     """ Animation base class. """
 
-    def __init__(self, leds, interval=50, palette=None, generator=None, brightness=200, **kwargs):
+    def __init__(self, leds, color=None, generator=None, palette=None, interval=50, brightness=200, **kwargs):
         """
         :param leds: TrickLED object
         :param interval: millisecond pause between each frame
@@ -129,22 +129,15 @@ class AnimationBase:
 
 class SolidColor(AnimationBase):
     """
-    Just a stub animation to set leds to a solid color
+    Just an animation to set leds to a solid color
     Use generator = None for solid, or pass a generator
     """
-    def __init__(self, leds, colors, generator=None):
+    def __init__(self, leds, color, generator):
         """
-        :param leds: TrickLED object
-        :param interval: millisecond pause between each frame
-        :param palette: color palette
-        :param generator: color generator
-        :param brightness: set brightness 0-100
         """
-        super().__init__(leds, generator=generator)
-        self.brightness = int(colors["br"])
-        self.red = int(colors["r"])*self.brightness//100
-        self.green = int(colors["g"])*self.brightness//100
-        self.blue = int(colors["b"])*self.brightness//100
+        self.rgb = color
+        print("self.rgb", self.rgb)
+        super().__init__(leds, color, generator)
         self.settings['interval'] = 5000
         
     def setup(self):
@@ -152,14 +145,14 @@ class SolidColor(AnimationBase):
             self.leds.fill_gen(self.generator)
             self.leds.write()
         else:
-            self.leds.fill_solid((self.red, self.green, self.blue))
+            self.leds.fill_solid(self.rgb)
 
 class NextGen(AnimationBase):
     """ Simple animation that animates a color generator by scrolling and
         feeding a new color in one frame at a time.
         Setting "blanks" will insert n blank pixels between each lit one.
     """
-    def __init__(self, leds, generator=None, blanks=0, scroll_speed=1, **kwargs):
+    def __init__(self, leds, color=None, generator=None, effect=None, blanks=0, scroll_speed=1, **kwargs):
         """
         :param leds: TrickLED object
         :param generator: Color generator
