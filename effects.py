@@ -31,7 +31,7 @@ class Effects():
         return generators.random_vivid()
            
     def gen_random_pastel(colors, hue_stride=10, stripe_size=20, start_hue=0):
-        return generators.random_pastel(mask=(hex_to_rgb(color)))
+        return generators.random_pastel(mask=(colors["rgb"]).to_bytes(3, 'big'))
     
     # ANIMATIONS   
     # no animation, only color
@@ -63,7 +63,7 @@ class Effects():
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
         ani.leds.repeat_n = leds.n//2
 #         ani.palette = None # color palette
-        ani.generator = getattr(Effects, colors['generator'])(color) # color generator
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
         # anim specific settings
         ani.settings['blanks'] = 0 
@@ -78,7 +78,7 @@ class Effects():
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
         ani.leds.repeat_n = leds.n
 #         ani.palette = None # color palette
-        ani.generator = getattr(Effects, colors['generator'])(color) # color generator
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 10 # millisecond pause between each frame
         # anim specific settings
         ani.settings['background'] = 0x000000 # rgb_to_hex(colors) # Background color of unsparked pixels
@@ -106,7 +106,7 @@ class Effects():
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
         ani.leds.repeat_n = leds.n//2
 #         ani.palette = None # color palette
-        ani.generator = getattr(Effects, colors['generator'])(color) # color generator
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
         # anim specific settings
         ani.settings['fill_mode'] = trickLED.FILL_MODE_MULTI
@@ -119,7 +119,7 @@ class Effects():
         ani.leds.repeat_n = n//2
         ani.leds.repeat_mode = leds.REPEAT_MODE_MIRROR
 #         ani.palette = None # color palette
-        ani.generator = getattr(Effects, colors['generator'])(color) # color generator
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
         # anim specific settings
         ani.settings['fill_mode'] = trickLED.FILL_MODE_MULTI
@@ -132,7 +132,7 @@ class Effects():
         ani.leds.repeat_mode = None
         ani.leds.repeat_n = None
 #         ani.palette = None # color palette
-        ani.generator = getattr(Effects, colors['generator'])(color) # color generator
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
         # anim specific settings
         ani.settings['sparking'] = 32
@@ -148,7 +148,7 @@ class Effects():
         ani.leds.repeat_n = None
         ani.leds.repeat_mode = None
 #         ani.palette = None # color palette
-        ani.generator = getattr(Effects, colors['generator'])(color) # color generator
+        ani.generator = getattr(Effects, colors['generator'])(colors) # color generator
         ani.settings['interval'] = 100 # millisecond pause between each frame
         print(f'Conjuction settings: {ani.settings}')
         return ani
